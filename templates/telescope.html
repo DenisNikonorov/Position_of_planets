@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добавление</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="add-container">
+        <h1 class="add-title">Добавление данных</h1>
+        <p class="add-subtitle">Опубликовать новые параметры орбиты планеты</p>
+
+        <label class="add-label">Медиафайл (фото/видео)</label>
+        <div class="media-dropzone">
+            <div class="media-dropzone-icons">
+                <svg viewBox="0 0 24 24">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <polyline points="21 15 16 10 5 21"/>
+                </svg>
+                <svg viewBox="0 0 24 24">
+                    <polygon points="23 7 16 12 23 17 23 7"/>
+                    <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                </svg>
+            </div>
+            <p class="media-dropzone-text">Перетащите видео или сделайте снимок</p>
+        </div>
+
+        <div class="form-group">
+            <label class="add-label">Название планеты</label>
+            <input type="text" class="form-input" placeholder="Например: Марс">
+        </div>
+
+        <div class="form-group">
+            <label class="add-label">Описание</label>
+            <textarea class="form-input" placeholder="Описание планеты..."></textarea>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label class="add-label">Расстояние (AU)</label>
+                <input type="text" class="form-input" placeholder="0.00">
+            </div>
+            <div class="form-group">
+                <label class="add-label">Угол перигелия (&deg;)</label>
+                <input type="text" class="form-input" placeholder="0.0">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="add-label">Дата наблюдения</label>
+            <input type="date" class="form-input">
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="/feed" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <circle cx="12" cy="12" r="3"/>
+                <line x1="12" y1="2" x2="12" y2="5"/>
+                <line x1="12" y1="19" x2="12" y2="22"/>
+                <line x1="2" y1="12" x2="5" y2="12"/>
+                <line x1="19" y1="12" x2="22" y2="12"/>
+            </svg>
+            Лента
+        </a>
+        <a href="/add" class="nav-item active">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="16"/>
+                <line x1="8" y1="12" x2="16" y2="12"/>
+            </svg>
+            Добавить
+        </a>
+        <a href="/tile" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="7" height="7" rx="1"/>
+                <rect x="14" y="3" width="7" height="7" rx="1"/>
+                <rect x="3" y="14" width="7" height="7" rx="1"/>
+                <rect x="14" y="14" width="7" height="7" rx="1"/>
+            </svg>
+            Плитка
+        </a>
+    </nav>
+</body>
+</html>

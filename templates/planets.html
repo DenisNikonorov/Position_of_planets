@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лента</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="feed-container">
+        {{if .planet.HasVideo}}
+        <video class="feed-media" autoplay muted loop playsinline>
+            <source src="{{.planet.ImageURL}}" type="video/mp4">
+        </video>
+        {{else}}
+            {{if .planet.ImageURL}}
+            <img class="feed-media" src="{{.planet.ImageURL}}" alt="{{.planet.Name}}">
+            {{else}}
+            <div class="feed-media" style="display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;">Нет медиа</div>
+            {{end}}
+        {{end}}
+
+        <div class="feed-sidebar">
+            <button class="like-btn" onclick="this.classList.toggle('liked')">
+                <svg viewBox="0 0 24 24">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+            </button>
+            <div class="feed-stats">
+                <span>{{.planet.DistanceFromSun}} AU</span>
+                <div class="feed-perihelion">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="5"/>
+                        <line x1="12" y1="1" x2="12" y2="7"/>
+                        <line x1="12" y1="17" x2="12" y2="23"/>
+                        <line x1="1" y1="12" x2="7" y2="12"/>
+                        <line x1="17" y1="12" x2="23" y2="12"/>
+                    </svg>
+                    {{.planet.Perihelion}}&deg;
+                </div>
+            </div>
+            <a href="/feed?next={{.nextIndex}}" class="next-btn">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"/>
+                </svg>
+            </a>
+        </div>
+
+        <div class="feed-description">
+            <div class="planet-name">{{.planet.Name}}</div>
+            <div class="desc-text" id="descText">{{.planet.Description}}</div>
+            <button class="desc-toggle" id="descToggle" onclick="toggleDesc()">больше</button>
+        </div>
+    </div>
+
+    <script>
+    function toggleDesc() {
+        var el = document.getElementById('descText');
+        var btn = document.getElementById('descToggle');
+        if (el.classList.contains('expanded')) {
+            el.classList.remove('expanded');
+            el.style.maxHeight = el.scrollHeight + 'px';
+            requestAnimationFrame(function() {
+                el.style.maxHeight = '3.6em';
+            });
+            btn.textContent = 'больше';
+        } else {
+            el.classList.add('expanded');
+            el.style.maxHeight = el.scrollHeight + 'px';
+            btn.textContent = 'меньше';
+        }
+    }
+    </script>
+
+    <nav class="bottom-nav">
+        <a href="/feed" class="nav-item active">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <circle cx="12" cy="12" r="3"/>
+                <line x1="12" y1="2" x2="12" y2="5"/>
+                <line x1="12" y1="19" x2="12" y2="22"/>
+                <line x1="2" y1="12" x2="5" y2="12"/>
+                <line x1="19" y1="12" x2="22" y2="12"/>
+            </svg>
+            Лента
+        </a>
+        <a href="/add" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="16"/>
+                <line x1="8" y1="12" x2="16" y2="12"/>
+            </svg>
+            Добавить
+        </a>
+        <a href="/tile" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="7" height="7" rx="1"/>
+                <rect x="14" y="3" width="7" height="7" rx="1"/>
+                <rect x="3" y="14" width="7" height="7" rx="1"/>
+                <rect x="14" y="14" width="7" height="7" rx="1"/>
+            </svg>
+            Плитка
+        </a>
+    </nav>
+</body>
+</html>
