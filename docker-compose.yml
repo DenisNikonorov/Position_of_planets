@@ -1,6 +1,32 @@
 version: '3.8'
 
 services:
+  postgres:
+    image: postgres:latest
+    container_name: planets-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: planets_position
+    ports:
+      # 5433 на хосте, чтобы не конфликтовать с уже установленным локальным PostgreSQL на 5432
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+
+  adminer:
+    image: adminer:latest
+    environment:
+      ADMINER_DESIGN: hever
+      ADMINER_PLUGINS: dark-switcher
+    container_name: planets-adminer
+    restart: always
+    ports:
+      - "8081:8080"
+    depends_on:
+      - postgres
+
   minio:
     image: minio/minio:latest # Либо latest
     container_name: minio-server
@@ -16,5 +42,7 @@ services:
     command: server /data --console-address ":9001"
 
 volumes:
+  postgres_data:
+    driver: local
   minio_data:
     driver: local

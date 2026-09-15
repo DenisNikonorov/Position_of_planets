@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ .planet.Name }}</title>
+    <link rel="stylesheet" href="/styles/planet_style.css">
+</head>
+<body>
+<header class="site-header">
+    <a href="/planets" class="home-link">
+        <span class="logo-text">ОБСЕРВАТОРИЯ</span>
+    </a>
+</header>
+<div class="profile-container">
+    <div class="profile-image">
+        {{ if .planet.HasVideo }}
+            {{ if .planet.URLVideo }}
+            <video autoplay muted loop playsinline>
+                <source src="{{ .planet.URLVideo }}" type="video/mp4">
+            </video>
+            {{ else }}
+            <div class="media-placeholder">Нет медиа</div>
+            {{ end }}
+        {{ else }}
+            {{ if .planet.ImageURL }}
+            <img src="{{ .planet.ImageURL }}" alt="{{ .planet.Name }}">
+            {{ else }}
+            <div class="media-placeholder">Нет медиа</div>
+            {{ end }}
+        {{ end }}
+    </div>
+    <div class="profile-details">
+        <h2>{{ .planet.Name }}</h2>
+        <p><b>Описание:</b> {{ .planet.Description }}</p>
+        <p><b>Расстояние от Солнца:</b> {{ .planet.DistanceFromSun }} AU</p>
+        <p><b>Дата наблюдения:</b> {{ .planet.ObservationDate }}</p>
+        <p><b>Лайки:</b> {{ .planet.LikesCount }}</p>
+        <a href="/planets" class="back-link">&larr; К списку планет</a>
+    </div>
+</div>
+</body>
+</html>
