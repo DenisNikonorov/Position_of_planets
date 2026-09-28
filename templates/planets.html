@@ -4,21 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Лента</title>
-    <link rel="stylesheet" href="/style.css?v=2">
+    <link rel="stylesheet" href="/style.css?v=3">
 </head>
 <body>
     <div class="feed-container">
-        {{if .planet.HasVideo}}
         <video class="feed-media" autoplay muted loop playsinline>
-            <source src="{{.planet.URLVideo}}" type="video/mp4">
+            <source src="{{if .planet.URLVideo}}{{.planet.URLVideo}}{{else}}/media/default_video.mp4{{end}}" type="video/mp4">
         </video>
-        {{else}}
-            {{if .planet.ImageURL}}
-            <img class="feed-media" src="{{.planet.ImageURL}}" alt="{{.planet.Name}}">
-            {{else}}
-            <div class="feed-media" style="display:flex;align-items:center;justify-content:center;color:#555;font-size:14px;">Нет медиа</div>
-            {{end}}
-        {{end}}
 
         <div class="feed-sidebar">
             <div class="feed-like-wrap">
@@ -50,29 +42,11 @@
 
         <div class="feed-description">
             <div class="planet-name">{{.planet.Name}}</div>
+            <input type="checkbox" id="descToggle" class="desc-checkbox">
             <div class="desc-text" id="descText">{{.planet.Description}}</div>
-            <button class="desc-toggle" id="descToggle" onclick="toggleDesc()">больше</button>
+            <label for="descToggle" class="desc-toggle"></label>
         </div>
     </div>
-
-    <script>
-    function toggleDesc() {
-        var el = document.getElementById('descText');
-        var btn = document.getElementById('descToggle');
-        if (el.classList.contains('expanded')) {
-            el.classList.remove('expanded');
-            el.style.maxHeight = el.scrollHeight + 'px';
-            requestAnimationFrame(function() {
-                el.style.maxHeight = '3.6em';
-            });
-            btn.textContent = 'больше';
-        } else {
-            el.classList.add('expanded');
-            el.style.maxHeight = el.scrollHeight + 'px';
-            btn.textContent = 'меньше';
-        }
-    }
-    </script>
 
     <nav class="bottom-nav">
         <a href="/feed" class="nav-item active">

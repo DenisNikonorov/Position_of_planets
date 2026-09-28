@@ -288,8 +288,9 @@ func (r *Repository) GetFirstDraft() (*ds.Planet, error) {
 }
 
 func (r *Repository) DeletePlanet(planetID uint) error {
-	err := r.db.Model(&ds.Planet{}).Where("id = ?", planetID).UpdateColumn("status", PlanetStatusDeleted).Error
-	if err != nil {
+	query := "UPDATE planets SET status = '" + PlanetStatusDeleted + "' WHERE id = $1"
+
+	if err := r.db.Exec(query, planetID).Error; err != nil {
 		return fmt.Errorf("ошибка при удалении планеты с id %d: %w", planetID, err)
 	}
 

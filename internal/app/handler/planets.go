@@ -42,6 +42,8 @@ func (h *Handler) RegisterHandler(router *gin.Engine) {
 func (h *Handler) RegisterStatic(router *gin.Engine) {
 	router.LoadHTMLGlob("templates/*")
 	router.Static("/styles", "./resources/styles")
+	router.StaticFile("/media/default_video.mp4", "resources/default_video.mp4")
+	router.StaticFile("/media/default_photo.png", "resources/default_photo.png")
 	router.GET("/style.css", func(ctx *gin.Context) {
 		// Не даём браузерам кэшировать старый CSS: no-cache заставляет
 		// перезапросить файл при каждом изменении.
