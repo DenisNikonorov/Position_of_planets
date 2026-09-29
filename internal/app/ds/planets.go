@@ -66,17 +66,23 @@ type UserSerializer struct {
 	Login string `json:"login"`
 }
 
-// CreatePlanetRequest — тело POST /api/planets.
-// Все поля приходят multipart-формой: name, description, числа, дата,
-// плюс файлы под ключами image_url и url_video.
-// Имя обязательно, остальные поля опциональны: не прислал — в JSON
-// останется пустая строка или ноль.
+// CreatePlanetRequest — тело POST /api/planets (этап 1).
+// multipart-форма: обязательное имя плюс файлы под ключами
+// image_url и url_video. Остальные поля заполняются вторым этапом, в PUT,
+// поэтому здесь они отсутствуют и остаются пустыми.
 type CreatePlanetRequest struct {
-	Name            string  `form:"name" binding:"required"`
-	Description     string  `form:"description"`
-	DistanceFromSun float64 `form:"distance_from_sun"`
-	Perihelion      float64 `form:"perihelion"`
-	ObservationDate string  `form:"observation_date"`
+	Name string `form:"name" binding:"required"`
+}
+
+// PublishPlanetRequest — тело PUT /api/planets/:id (этап 2).
+// Только бизнес-поля, без id/status/timestamps: их считает бэкенд.
+// Числа — указатели, иначе обязательный тег отбросил бы нулевое значение,
+// а 0 — валидное расстояние.
+type PublishPlanetRequest struct {
+	Description     string   `json:"description" binding:"required"`
+	DistanceFromSun *float64 `json:"distance_from_sun" binding:"required"`
+	Perihelion      *float64 `json:"perihelion" binding:"required"`
+	ObservationDate string   `json:"observation_date" binding:"required"`
 }
 
 // LikeRequest — тело POST /api/planets/:id/like. 1 ставит лайк, 0 отменяет.

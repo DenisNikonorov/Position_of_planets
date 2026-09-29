@@ -111,11 +111,10 @@ func (h *Handler) GetDraft(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, draft)
 }
 
-// AddPlanet — POST /api/planets
-// multipart/form-data: name, description, distance_from_sun, perihelion,
-// observation_date, а также файлы под ключами image_url и url_video.
-// Создаёт запись в статусе draft и складывает медиафайлы в MinIO.
-// Возвращает 201 и заполненный JSON.
+// AddPlanet — POST /api/planets (этап 1 публикации).
+// multipart/form-data: name и файлы под ключами image_url, url_video.
+// Создаёт черновик с пустыми бизнес-полями и складывает медиафайлы в MinIO.
+// Возвращает 201 и JSON с заполненными именем и ссылками на медиа.
 func (h *Handler) AddPlanet(ctx *gin.Context) {
 	if err := ctx.Request.ParseMultipartForm(2 << 20); err != nil {
 		h.fail(ctx, http.StatusBadRequest)
@@ -146,7 +145,7 @@ func (h *Handler) AddPlanet(ctx *gin.Context) {
 		videoName = repository.DefaultVideoName
 	}
 
-	planet, err := h.Repository.CreatePlanet(auth.CurrentUserID(), req, imageName, videoName)
+	planet, err := h.Repository.CreatePlanet(auth.CurrentUserID(), req.Name, imageName, videoName)
 	if err != nil {
 		h.fail(ctx, http.StatusInternalServerError)
 		return
@@ -165,9 +164,9 @@ func fileHeader(ctx *gin.Context, field string) *multipart.FileHeader {
 	return header
 }
 
-// PublishPlanet — PUT /api/planets/:id
-// Публикация черновика. Тело не требуется: бизнес-поля уже заполнены
-// при создании, здесь меняется только статус.
+// PublishPlanet — PUT /api/planets/:id (этап 2 публикации).
+// Тело: JSON с бизнес-полями. Статус меняет только бизнес-логика:
+// переход разрешён из draft, обратно в черновик вернуться нельзя.
 func (h *Handler) PublishPlanet(ctx *gin.Context) {
 	id, ok := planetID(ctx)
 	if !ok {
@@ -175,7 +174,13 @@ func (h *Handler) PublishPlanet(ctx *gin.Context) {
 		return
 	}
 
-	planet, err := h.Repository.PublishPlanet(auth.CurrentUserID(), id)
+	var req ds.PublishPlanetRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		h.fail(ctx, http.StatusBadRequest)
+		return
+	}
+
+	planet, err := h.Repository.PublishPlanet(auth.CurrentUserID(), id, req)
 	if err != nil {
 		if errors.Is(err, repository.ErrNotFound) {
 			h.fail(ctx, http.StatusNotFound)

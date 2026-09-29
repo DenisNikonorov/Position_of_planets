@@ -326,18 +326,15 @@ func (r *Repository) GetUserDraft(userID uint) (*ds.PlanetSerializer, error) {
 }
 
 // CreatePlanet создаёт запись в статусе draft от имени userID.
-// Статус и создатель вычисляются на бэкенде; бизнес-поля берутся из формы.
-func (r *Repository) CreatePlanet(userID uint, req ds.CreatePlanetRequest, imageName, videoName string) (*ds.PlanetSerializer, error) {
+// На первом этапе заполняются только имя и медиа: остальные поля
+// клиент пришлёт вторым этапом, в PUT.
+func (r *Repository) CreatePlanet(userID uint, name, imageName, videoName string) (*ds.PlanetSerializer, error) {
 	planet := ds.Planet{
-		UserID:          userID,
-		Name:            req.Name,
-		Description:     req.Description,
-		DistanceFromSun: req.DistanceFromSun,
-		Perihelion:      req.Perihelion,
-		ObservationDate: req.ObservationDate,
-		ImageURL:        imageName,
-		URLVideo:        videoName,
-		Status:          ds.PlanetStatusDraft,
+		UserID:   userID,
+		Name:     name,
+		ImageURL: imageName,
+		URLVideo: videoName,
+		Status:   ds.PlanetStatusDraft,
 	}
 
 	if err := r.db.Create(&planet).Error; err != nil {
@@ -348,13 +345,20 @@ func (r *Repository) CreatePlanet(userID uint, req ds.CreatePlanetRequest, image
 	return &serialized[0], nil
 }
 
-// PublishPlanet переводит черновик в опубликованный.
-// Переход разрешён только из draft: обратно в черновик вернуться нельзя.
-// Поля планеты при этом не изменяются.
-func (r *Repository) PublishPlanet(userID uint, id uint) (*ds.PlanetSerializer, error) {
+// PublishPlanet дописывает бизнес-поля и переводит черновик
+// в опубликованный. Переход разрешён только из draft: обратно
+// в черновик вернуться нельзя. Идентификатор и статус не берутся
+// из тела запроса.
+func (r *Repository) PublishPlanet(userID uint, id uint, req ds.PublishPlanetRequest) (*ds.PlanetSerializer, error) {
 	result := r.db.Model(&ds.Planet{}).
 		Where("id = ? AND user_id = ? AND status = ?", id, userID, ds.PlanetStatusDraft).
-		Update("status", ds.PlanetStatusPublished)
+		Updates(map[string]interface{}{
+			"description":       req.Description,
+			"distance_from_sun": *req.DistanceFromSun,
+			"perihelion":        *req.Perihelion,
+			"observation_date":  req.ObservationDate,
+			"status":            ds.PlanetStatusPublished,
+		})
 	if result.Error != nil {
 		return nil, fmt.Errorf("публикация планеты: %w", result.Error)
 	}
