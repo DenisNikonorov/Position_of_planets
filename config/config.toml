@@ -1,2 +1,12 @@
 ServiceHost = "0.0.0.0"
 ServicePort = 8080
+
+MinioEndpoint = "localhost:9000"
+MinioAccessKey = "admin"
+MinioSecretKey = "adminpassword"
+MinioBucket = "planets"
+MinioUseSSL = false
+MinioPublicURL = "http://localhost:9000"
+
+DefaultPhotoPath = "resources/default_photo.png"
+DefaultVideoPath = "resources/default_video.mp4"
