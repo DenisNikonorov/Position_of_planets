@@ -478,8 +478,22 @@ func (r *Repository) SetLike(userID uint, planetID uint, like int) (*ds.PlanetSe
 	return &serialized[0], nil
 }
 
+// GetUserByLogin ищет пользователя по логину для аутентификации.
+// Возвращает пароль (в хеше) — он нужен только для проверки внутри сервиса.
+func (r *Repository) GetUserByLogin(login string) (*ds.User, error) {
+	var user ds.User
+	err := r.db.Where("login = ?", login).First(&user).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrNotFound
+		}
+		return nil, fmt.Errorf("чтение пользователя: %w", err)
+	}
+	return &user, nil
+}
+
 // CreateUser регистрирует нового пользователя. id и is_moderator —
-// системные поля, клиент их не передаёт.
+// системные поля, клиент их не передаёт. Пароль сохраняется хешированным.
 func (r *Repository) CreateUser(login, password string) (*ds.UserSerializer, error) {
 	var existing int64
 	if err := r.db.Model(&ds.User{}).Where("login = ?", login).Count(&existing).Error; err != nil {
@@ -489,7 +503,12 @@ func (r *Repository) CreateUser(login, password string) (*ds.UserSerializer, err
 		return nil, ErrForbidden
 	}
 
-	user := ds.User{Login: login, Password: password, IsModerator: false}
+	hashed, err := HashPassword(password)
+	if err != nil {
+		return nil, err
+	}
+
+	user := ds.User{Login: login, Password: hashed, IsModerator: false}
 	if err := r.db.Create(&user).Error; err != nil {
 		return nil, fmt.Errorf("создание пользователя: %w", err)
 	}

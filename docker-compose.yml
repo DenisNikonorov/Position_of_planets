@@ -41,8 +41,20 @@ services:
       - minio_data:/data                  # Хранилище загруженных файлов
     command: server /data --console-address ":9001"
 
+  redis:
+    image: redis:6.2-alpine
+    container_name: planets-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    command: redis-server --save 20 1 --loglevel warning --requirepass password
+    volumes:
+      - redis-data:/data
+
 volumes:
   postgres_data:
     driver: local
   minio_data:
+    driver: local
+  redis-data:
     driver: local

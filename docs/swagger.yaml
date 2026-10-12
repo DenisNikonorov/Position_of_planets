@@ -1,0 +1,477 @@
+basePath: /api
+definitions:
+  ds.LikeRequest:
+    properties:
+      like:
+        enum:
+        - 0
+        - 1
+        type: integer
+    required:
+    - like
+    type: object
+  ds.LoginUserRequest:
+    properties:
+      login:
+        type: string
+      password:
+        type: string
+    required:
+    - login
+    - password
+    type: object
+  ds.PlanetSerializer:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      distance_from_sun:
+        type: string
+      id:
+        type: integer
+      image_url:
+        type: string
+      is_owner:
+        type: integer
+      liked:
+        type: integer
+      likes_count:
+        type: integer
+      name:
+        type: string
+      observation_date:
+        type: string
+      perihelion:
+        type: string
+      updated_at:
+        type: string
+      url_video:
+        type: string
+    type: object
+  ds.PublishPlanetRequest:
+    properties:
+      description:
+        type: string
+      distance_from_sun:
+        type: number
+      observation_date:
+        type: string
+      perihelion:
+        type: number
+    required:
+    - description
+    - distance_from_sun
+    - observation_date
+    - perihelion
+    type: object
+  ds.RegisterUserRequest:
+    properties:
+      login:
+        minLength: 3
+        type: string
+      password:
+        minLength: 4
+        type: string
+    required:
+    - login
+    - password
+    type: object
+  ds.TokenResponse:
+    properties:
+      access_token:
+        type: string
+      expires_in:
+        type: integer
+      token_type:
+        type: string
+    type: object
+  ds.UserSerializer:
+    properties:
+      id:
+        type: integer
+      login:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: 'Бэкенд SPA с планетами. Аутентификация по JWT: access-токен выдаёт
+    POST /api/users/auth и проверяется middleware, logout кладёт токен в блеклист
+    Redis.'
+  title: Planets Position API
+  version: "1.0"
+paths:
+  /planets:
+    get:
+      description: 'Опубликованные планеты с фильтрами. Работает и без токена: у гостя
+        liked и is_owner равны 0.'
+      parameters:
+      - description: Поиск по названию (ILIKE)
+        in: query
+        name: search
+        type: string
+      - description: Максимальное расстояние от Солнца
+        in: query
+        name: maxDist
+        type: number
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/ds.PlanetSerializer'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Список планет
+      tags:
+      - planets
+    post:
+      consumes:
+      - multipart/form-data
+      description: Первый этап публикации. Владелец берётся из токена, поэтому подделать
+        user_id нельзя. Отсутствующие файлы заменяются дефолтными.
+      parameters:
+      - description: Название планеты
+        in: formData
+        name: name
+        required: true
+        type: string
+      - description: Изображение (иначе дефолтное)
+        in: formData
+        name: image_url
+        type: file
+      - description: Видео (иначе дефолтное)
+        in: formData
+        name: url_video
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/ds.PlanetSerializer'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Создать планету (черновик)
+      tags:
+      - planets
+  /planets/{id}:
+    delete:
+      description: 'Мягкое удаление: запись остаётся в БД, но исчезает из выдачи.
+        Удалить можно только свою.'
+      parameters:
+      - description: Идентификатор планеты
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ds.PlanetSerializer'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Удалить планету
+      tags:
+      - planets
+    put:
+      consumes:
+      - application/json
+      description: 'Второй этап публикации: заполняет бизнес-поля черновика и переводит
+        его в published. Изменить чужую запись нельзя.'
+      parameters:
+      - description: Идентификатор планеты
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Бизнес-поля планеты
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/ds.PublishPlanetRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ds.PlanetSerializer'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Опубликовать планету
+      tags:
+      - planets
+  /planets/{id}/like:
+    post:
+      consumes:
+      - application/json
+      description: Лайк ставит авторизованный пользователь на опубликованную планету.
+      parameters:
+      - description: Идентификатор планеты
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 1 — поставить, 0 — снять
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/ds.LikeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ds.PlanetSerializer'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Поставить или снять лайк
+      tags:
+      - planets
+  /planets/draft:
+    get:
+      description: 'Последний черновик пользователя из токена. Требуется Authorization:
+        Bearer.'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ds.PlanetSerializer'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Поля черновика
+      tags:
+      - planets
+  /planets/feed:
+    get:
+      description: Одна планета из ленты. Без id — первая; с id и next=true — следующая
+        после id (по кругу).
+      parameters:
+      - description: Идентификатор текущей планеты
+        in: query
+        name: id
+        type: integer
+      - description: Взять следующую после id
+        in: query
+        name: next
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ds.PlanetSerializer'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      summary: Лента планет
+      tags:
+      - planets
+  /users:
+    post:
+      consumes:
+      - application/json
+      description: Создаёт пользователя с bcrypt-хешем пароля. Логин должен быть свободен.
+      parameters:
+      - description: Данные нового пользователя
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/ds.RegisterUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/ds.UserSerializer'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Регистрация пользователя
+      tags:
+      - users
+  /users/auth:
+    post:
+      consumes:
+      - application/json
+      description: Возвращает access-токен. Неверный логин или пароль — 401. Токен
+        действует JWT_EXPIRES_IN, после logout попадает в блеклист Redis.
+      parameters:
+      - description: Логин и пароль
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/ds.LoginUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ds.TokenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Аутентификация (вход)
+      tags:
+      - users
+  /users/deauth:
+    post:
+      description: 'Отзывает текущий токен: записывает его в блеклист Redis на срок
+        жизни до exp. Повторное использование токена — 403.'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Выход (logout)
+      tags:
+      - users
+schemes:
+- http
+securityDefinitions:
+  BearerAuth:
+    description: 'Формат: "Bearer <access_token>" из ответа POST /api/users/auth.
+      Без токена доступно только чтение.'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
