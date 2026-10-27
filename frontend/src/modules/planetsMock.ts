@@ -1,0 +1,108 @@
+import type { Planet } from './planets'
+
+export const PLANETS_MOCK: Planet[] = [
+  {
+    id: 1,
+    name: 'Меркурий',
+    description:
+      'Ближайшая к Солнцу планета. Поверхность покрыта кратерами, атмосфера практически отсутствует. Температура колеблется от -180 °C ночью до +430 °C днём.',
+    imageURL: '',
+    urlVideo: '',
+    distanceFromSun: 0.39,
+    perihelion: 46.0,
+    likesCount: 12,
+    observationDate: '2026-03-15',
+    hasVideo: false,
+  },
+  {
+    id: 2,
+    name: 'Земля',
+    description:
+      'Единственная известная планета с жидкой водой и жизнью. Атмосфера состоит преимущественно из азота и кислорода. Имеет один естественный спутник — Луну.',
+    imageURL: '',
+    urlVideo: '',
+    distanceFromSun: 1.0,
+    perihelion: 102.9,
+    likesCount: 42,
+    observationDate: '2026-04-02',
+    hasVideo: false,
+  },
+  {
+    id: 3,
+    name: 'Марс',
+    description:
+      'Красная планета с разреженной атмосферой. Имеет два небольших спутника — Фобос и Деймос. Ржавый цвет поверхности обусловлен оксидом железа.',
+    imageURL: '',
+    urlVideo: '',
+    distanceFromSun: 1.52,
+    perihelion: 206.7,
+    likesCount: 27,
+    observationDate: '2026-02-20',
+    hasVideo: false,
+  },
+  {
+    id: 4,
+    name: 'Венера',
+    description:
+      'Самая горячая планета Солнечной системы: температура поверхности около +460 °C. Плотная углекислотная атмосфера создаёт парниковый эффект.',
+    imageURL: '',
+    urlVideo: '',
+    distanceFromSun: 0.72,
+    perihelion: 107.5,
+    likesCount: 18,
+    observationDate: '2026-01-10',
+    hasVideo: false,
+  },
+  {
+    id: 5,
+    name: 'Юпитер',
+    description:
+      'Крупнейшая планета Солнечной системы — газовый гигант. Большое Красное Пятно является гигантским штормом, наблюдающимся более 300 лет.',
+    imageURL: '',
+    urlVideo: '',
+    distanceFromSun: 5.2,
+    perihelion: 740.6,
+    likesCount: 35,
+    observationDate: '2026-03-28',
+    hasVideo: false,
+  },
+  {
+    id: 6,
+    name: 'Сатурн',
+    description:
+      'Знаменит кольцами из льда и камня. Планета настолько лёгкая, что в ней вода бы плавала. Имеет более 140 спутников, самый крупный — Титан.',
+    imageURL: '',
+    urlVideo: '',
+    distanceFromSun: 9.58,
+    perihelion: 1201.1,
+    likesCount: 51,
+    observationDate: '2026-04-18',
+    hasVideo: false,
+  },
+  {
+    id: 7,
+    name: 'Уран',
+    description:
+      'Ледяной гигант, вращающийся «лёжа на боку» — ось наклонена почти на 98°. Цвет обусловлен метаном в атмосфере.',
+    imageURL: '',
+    urlVideo: '',
+    distanceFromSun: 19.2,
+    perihelion: 1706.8,
+    likesCount: 9,
+    observationDate: '2026-02-05',
+    hasVideo: false,
+  },
+  {
+    id: 8,
+    name: 'Нептун',
+    description:
+      'Самая дальняя планета. Ветры здесь достигают скорости 2100 км/ч — самые быстрые в Солнечной системе. Открыт по расчётам до наблюдения.',
+    imageURL: '',
+    urlVideo: '',
+    distanceFromSun: 30.1,
+    perihelion: 2741.3,
+    likesCount: 15,
+    observationDate: '2026-01-30',
+    hasVideo: false,
+  },
+]
