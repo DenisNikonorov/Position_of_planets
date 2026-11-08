@@ -2,16 +2,30 @@ import type { FC } from 'react'
 import { useState, useEffect } from 'react'
 import { PLANETS_MOCK } from '../modules/planetsMock'
 
+const DEFAULT_VIDEO = '/media/default_video.mp4'
+
 const PlanetsFeedPage: FC = () => {
   const [index, setIndex] = useState(0)
   const [likes, setLikes] = useState<Record<number, boolean>>({})
 
   const planet = PLANETS_MOCK[index]
+  const [videoSrc, setVideoSrc] = useState(planet.urlVideo || DEFAULT_VIDEO)
   const liked = !!likes[planet.id]
   const likesCount = planet.likesCount + (liked ? 1 : 0)
 
   const goNext = () => setIndex((i) => (i + 1) % PLANETS_MOCK.length)
   const toggleLike = () => setLikes((state) => ({ ...state, [planet.id]: !state[planet.id] }))
+
+  useEffect(() => {
+    setVideoSrc(planet.urlVideo || DEFAULT_VIDEO)
+    window.scrollTo(0, 0)
+  }, [index, planet.urlVideo])
+
+  const handleVideoError = () => {
+    if (videoSrc !== DEFAULT_VIDEO) {
+      setVideoSrc(DEFAULT_VIDEO)
+    }
+  }
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -24,9 +38,15 @@ const PlanetsFeedPage: FC = () => {
 
   return (
     <div className="feed-container">
-      <video className="feed-media" autoPlay muted loop playsInline key={planet.id}>
-        <source src={planet.urlVideo || '/media/default_video.mp4'} type="video/mp4" />
-      </video>
+      <video
+        className="feed-media"
+        autoPlay
+        muted
+        loop
+        playsInline
+        src={videoSrc}
+        onError={handleVideoError}
+      />
 
       <div className="feed-sidebar">
         <div className="feed-like-wrap">
