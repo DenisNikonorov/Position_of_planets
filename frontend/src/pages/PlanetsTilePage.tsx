@@ -1,31 +1,38 @@
 import type { FC } from 'react'
-import { useState, useMemo } from 'react'
-import { PLANETS_MOCK } from '../modules/planetsMock'
-import PlanetsFilter from '../components/PlanetsFilter'
+import { useEffect } from 'react'
 import PlanetsCard from '../components/PlanetsCard'
+import PlanetsFilter from '../components/PlanetsFilter'
+import PlanetsLoading from '../components/PlanetsLoading'
+import { useAppDispatch, useAppSelector } from '../hooks'
+import { getPlanetsList } from '../store/planetsSlice'
 
 const PlanetsTilePage: FC = () => {
-  const [maxDistance, setMaxDistance] = useState(12)
-  const [appliedMaxDistance, setAppliedMaxDistance] = useState(1000)
+  const dispatch = useAppDispatch()
+  const planets = useAppSelector((state) => state.planets.planets)
+  const loading = useAppSelector((state) => state.planets.loading)
+  const error = useAppSelector((state) => state.planets.error)
 
-  const handleApply = () => setAppliedMaxDistance(maxDistance)
-
-  const filteredPlanets = useMemo(
-    () => PLANETS_MOCK.filter((planet) => planet.distanceFromSun <= appliedMaxDistance),
-    [appliedMaxDistance],
-  )
+  useEffect(() => {
+    dispatch(getPlanetsList())
+  }, [dispatch])
 
   return (
     <div className="tile-container">
-      <PlanetsFilter maxDistance={maxDistance} setMaxDistance={setMaxDistance} onApply={handleApply} />
+      <PlanetsFilter loading={loading} />
       <div className="tiles-grid">
-        {filteredPlanets.map((planet) => (
+        {planets.map((planet) => (
           <PlanetsCard key={planet.id} planet={planet} />
         ))}
       </div>
-      {filteredPlanets.length === 0 && (
+      {planets.length === 0 && !loading && !error && (
         <p style={{ color: '#888', textAlign: 'center', marginTop: 24 }}>Ничего не найдено</p>
       )}
+      {error && !loading && (
+        <p className="form-error" style={{ marginTop: 24 }}>
+          {error}
+        </p>
+      )}
+      {loading && <PlanetsLoading />}
     </div>
   )
 }

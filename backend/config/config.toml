@@ -1,0 +1,27 @@
+ServiceHost = "0.0.0.0"
+ServicePort = 8080
+
+MinioEndpoint = "localhost:9000"
+MinioAccessKey = "admin"
+MinioSecretKey = "adminpassword"
+MinioBucket = "planets"
+MinioUseSSL = false
+MinioPublicURL = "/minio"
+
+DefaultPhotoPath = "resources/default_photo.png"
+DefaultVideoPath = "resources/default_video.mp4"
+
+# Настройки JWT. Значения по умолчанию: приоритет у переменных
+# окружения из .env (JWT_SECRET, JWT_EXPIRES_IN, JWT_ISSUER).
+[JWT]
+Secret = "planets-jwt-secret"
+ExpiresIn = "24h"
+Issuer = "planets-position"
+
+# Настройки Redis — хранилища блеклиста токенов (logout).
+# Приоритет у REDIS_HOST / REDIS_PORT / REDIS_USER / REDIS_PASSWORD.
+[Redis]
+Host = "localhost"
+Port = 6379
+User = ""
+Password = "password"
