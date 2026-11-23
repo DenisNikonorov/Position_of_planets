@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Положение планет</title>
+    <script>
+      (function () {
+        var segments = location.pathname.split('/').filter(Boolean)
+        var base = segments.length ? '/' + segments[0] + '/' : '/'
+        sessionStorage.setItem(
+          'redirect',
+          base + segments.slice(1).join('/') + location.search + location.hash,
+        )
+        location.replace(base)
+      })()
+    </script>
+  </head>
+  <body></body>
+</html>
