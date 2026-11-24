@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import PlanetsLoading from '../components/PlanetsLoading'
 import { useAppDispatch, useAppSelector } from '../hooks'
+import { DEFAULT_PHOTO, DEFAULT_VIDEO } from '../modules/planets'
 import { createPlanet, getDraft, publishPlanet } from '../store/planetsSlice'
 
 // Страница «Добавление» — два шага:
@@ -19,9 +20,11 @@ const PlanetsAddPage: FC = () => {
 
   const [ready, setReady] = useState(false)
   const [name, setName] = useState('')
-  const [file, setFile] = useState<File | null>(null)
-  const [previewUrl, setPreviewUrl] = useState('')
-  const [dragOver, setDragOver] = useState(false)
+  const [photo, setPhoto] = useState<File | null>(null)
+  const [video, setVideo] = useState<File | null>(null)
+  const [photoPreview, setPhotoPreview] = useState('')
+  const [videoPreview, setVideoPreview] = useState('')
+  const [dragOver, setDragOver] = useState<'photo' | 'video' | null>(null)
   const [description, setDescription] = useState('')
   const [distance, setDistance] = useState('')
   const [observationDate, setObservationDate] = useState('')
@@ -39,17 +42,46 @@ const PlanetsAddPage: FC = () => {
     })
   }, [dispatch])
 
-  useEffect(() => () => URL.revokeObjectURL(previewUrl), [previewUrl])
+  useEffect(
+    () => () => {
+      if (photoPreview) URL.revokeObjectURL(photoPreview)
+    },
+    [photoPreview],
+  )
 
-  const handleFile = (next: File | null | undefined) => {
+  useEffect(
+    () => () => {
+      if (videoPreview) URL.revokeObjectURL(videoPreview)
+    },
+    [videoPreview],
+  )
+
+  const handleFile = (kind: 'photo' | 'video', next: File | null | undefined) => {
     if (!next) return
-    setFile(next)
-    setPreviewUrl(URL.createObjectURL(next))
+    if (kind === 'photo') {
+      if (!next.type.startsWith('image/')) return
+      setPhoto(next)
+      setPhotoPreview(URL.createObjectURL(next))
+    } else {
+      if (!next.type.startsWith('video/')) return
+      setVideo(next)
+      setVideoPreview(URL.createObjectURL(next))
+    }
+  }
+
+  const resetFile = (kind: 'photo' | 'video') => {
+    if (kind === 'photo') {
+      setPhoto(null)
+      setPhotoPreview('')
+    } else {
+      setVideo(null)
+      setVideoPreview('')
+    }
   }
 
   const handleStep1 = async (event: FormEvent) => {
     event.preventDefault()
-    await dispatch(createPlanet({ name, file }))
+    await dispatch(createPlanet({ name, image: photo, video }))
   }
 
   const handleStep2 = async (event: FormEvent) => {
@@ -86,61 +118,137 @@ const PlanetsAddPage: FC = () => {
   }
 
   if (!draft) {
-    const isVideo = file ? file.type === 'video/mp4' || /\.mp4$/i.test(file.name) : false
-
     return (
       <div className="add-container">
         <h1 className="add-title">Добавление данных</h1>
         <p className="add-subtitle">Покажите новую планету — шаг 1 из 2</p>
 
         <form onSubmit={(event) => void handleStep1(event)}>
-          <label className="add-label">Медиафайл (фото/видео)</label>
-          <label
-            className={`media-dropzone ${dragOver ? 'dragover' : ''}`}
-            onDragEnter={(event) => {
-              event.preventDefault()
-              setDragOver(true)
-            }}
-            onDragOver={(event) => {
-              event.preventDefault()
-              setDragOver(true)
-            }}
-            onDragLeave={() => setDragOver(false)}
-            onDrop={(event) => {
-              event.preventDefault()
-              setDragOver(false)
-              handleFile(event.dataTransfer.files?.[0])
-            }}
-          >
-            <div className="media-dropzone-icons">
-              <svg viewBox="0 0 24 24">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                <circle cx="8.5" cy="8.5" r="1.5" />
-                <polyline points="21 15 16 10 5 21" />
-              </svg>
-              <svg viewBox="0 0 24 24">
-                <polygon points="23 7 16 12 23 17 23 7" />
-                <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
-              </svg>
+          <div className="media-grid">
+            <div className="media-field">
+              <span className="add-label">Фото планеты</span>
+              <label
+                className={`media-dropzone ${dragOver === 'photo' ? 'dragover' : ''}`}
+                onDragEnter={(event) => {
+                  event.preventDefault()
+                  setDragOver('photo')
+                }}
+                onDragOver={(event) => {
+                  event.preventDefault()
+                  setDragOver('photo')
+                }}
+                onDragLeave={() => setDragOver(null)}
+                onDrop={(event) => {
+                  event.preventDefault()
+                  setDragOver(null)
+                  handleFile('photo', event.dataTransfer.files?.[0])
+                }}
+              >
+                <div className="media-dropzone-icons">
+                  <svg viewBox="0 0 24 24">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                    <circle cx="8.5" cy="8.5" r="1.5" />
+                    <polyline points="21 15 16 10 5 21" />
+                  </svg>
+                </div>
+                <p className="media-dropzone-text">
+                  {photo ? photo.name : 'Перетащите фото или нажмите'}
+                </p>
+                <div className="media-preview">
+                  {photo ? (
+                    <img className="preview-media" src={photoPreview} alt={photo.name} />
+                  ) : (
+                    <>
+                      <img
+                        className="preview-media media-default"
+                        src={DEFAULT_PHOTO}
+                        alt="Фото по умолчанию"
+                      />
+                      <p className="media-default-text">по умолчанию</p>
+                    </>
+                  )}
+                </div>
+                <input
+                  type="file"
+                  name="image_url"
+                  accept="image/*"
+                  onChange={(event) => handleFile('photo', event.target.files?.[0])}
+                />
+              </label>
+              {photo && (
+                <button type="button" className="media-reset" onClick={() => resetFile('photo')}>
+                  Сбросить фото
+                </button>
+              )}
             </div>
-            <p className="media-dropzone-text">
-              {file ? file.name : 'Перетащите видео или сделайте снимок'}
-            </p>
-            <div className="media-preview" hidden={!file}>
-              {file &&
-                (isVideo ? (
-                  <video className="preview-media" src={previewUrl} muted loop autoPlay controls />
-                ) : (
-                  <img className="preview-media" src={previewUrl} alt={file.name} />
-                ))}
+
+            <div className="media-field">
+              <span className="add-label">Видео планеты</span>
+              <label
+                className={`media-dropzone ${dragOver === 'video' ? 'dragover' : ''}`}
+                onDragEnter={(event) => {
+                  event.preventDefault()
+                  setDragOver('video')
+                }}
+                onDragOver={(event) => {
+                  event.preventDefault()
+                  setDragOver('video')
+                }}
+                onDragLeave={() => setDragOver(null)}
+                onDrop={(event) => {
+                  event.preventDefault()
+                  setDragOver(null)
+                  handleFile('video', event.dataTransfer.files?.[0])
+                }}
+              >
+                <div className="media-dropzone-icons">
+                  <svg viewBox="0 0 24 24">
+                    <polygon points="23 7 16 12 23 17 23 7" />
+                    <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+                  </svg>
+                </div>
+                <p className="media-dropzone-text">
+                  {video ? video.name : 'Перетащите видео или нажмите'}
+                </p>
+                <div className="media-preview">
+                  {video ? (
+                    <video
+                      className="preview-media"
+                      src={videoPreview}
+                      muted
+                      loop
+                      autoPlay
+                      controls
+                      playsInline
+                    />
+                  ) : (
+                    <>
+                      <video
+                        className="preview-media media-default"
+                        src={DEFAULT_VIDEO}
+                        muted
+                        loop
+                        autoPlay
+                        playsInline
+                      />
+                      <p className="media-default-text">по умолчанию</p>
+                    </>
+                  )}
+                </div>
+                <input
+                  type="file"
+                  name="url_video"
+                  accept="video/mp4"
+                  onChange={(event) => handleFile('video', event.target.files?.[0])}
+                />
+              </label>
+              {video && (
+                <button type="button" className="media-reset" onClick={() => resetFile('video')}>
+                  Сбросить видео
+                </button>
+              )}
             </div>
-            <input
-              type="file"
-              name="media"
-              accept="image/*,video/mp4"
-              onChange={(event) => handleFile(event.target.files?.[0])}
-            />
-          </label>
+          </div>
 
           <div className="form-group">
             <label className="add-label">Название планеты</label>

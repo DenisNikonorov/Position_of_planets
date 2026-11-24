@@ -96,18 +96,18 @@ export const getFeed = createAsyncThunk<
 })
 
 // POST /api/planets — черновик (шаг 1 публикации). Только авторизованный.
+// Фото и видео передаются независимо; отсутствующее бэкенд заменит дефолтным.
 export const createPlanet = createAsyncThunk<
   Planet,
-  { name: string; file?: File | null },
+  { name: string; image?: File | null; video?: File | null },
   ThunkConfig
->('planets/createPlanet', async ({ name, file }) => {
+>('planets/createPlanet', async ({ name, image, video }) => {
   const body: { name: string; image_url?: File; url_video?: File } = { name }
-  if (file) {
-    if (file.type.startsWith('image/')) {
-      body.image_url = file
-    } else {
-      body.url_video = file
-    }
+  if (image) {
+    body.image_url = image
+  }
+  if (video) {
+    body.url_video = video
   }
   const response = await api.planets.planetsCreate(body)
   return response.data as Planet

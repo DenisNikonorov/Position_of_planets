@@ -338,6 +338,58 @@ button.nav-item {
     display: none;
 }
 
+.media-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 28px;
+}
+
+.media-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.media-grid .media-dropzone {
+    margin-bottom: 0;
+    padding: 24px 16px;
+}
+
+.media-grid .media-preview {
+    margin-top: 10px;
+}
+
+.media-grid .preview-media {
+    max-height: 180px;
+}
+
+.media-default {
+    opacity: 0.55;
+}
+
+.media-default-text {
+    margin-top: 6px;
+    font-size: 11px;
+    color: #666;
+}
+
+.media-reset {
+    align-self: flex-start;
+    background: none;
+    border: none;
+    color: #e2b340;
+    font-size: 12px;
+    font-family: inherit;
+    cursor: pointer;
+    padding: 6px 0 0;
+}
+
+@media (min-width: 700px) {
+    .media-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
 .step-btn {
     width: 100%;
     background: #e2b340;
