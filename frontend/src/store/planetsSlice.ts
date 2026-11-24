@@ -3,6 +3,9 @@ import { api } from '../api'
 import type { Planet } from '../modules/planets'
 import { PLANETS_MOCK } from '../modules/planetsMock'
 
+// На GitHub Pages бэкенда нет — сборка с VITE_MOCK=1 работает только на mock.
+const MOCK = import.meta.env.VITE_MOCK === '1'
+
 export interface PlanetsState {
   // Значение слайдера фильтра (хранится в Redux).
   maxDist: number
@@ -35,11 +38,25 @@ const mockFiltered = (maxDist: number | null): Planet[] =>
     ? PLANETS_MOCK
     : PLANETS_MOCK.filter((planet) => Number(planet.distance_from_sun) <= maxDist)
 
+const mockFeed = (arg?: { id?: number; next?: boolean }): Planet => {
+  let index = 0
+  if (arg?.id !== undefined) {
+    const current = PLANETS_MOCK.findIndex((planet) => planet.id === arg.id)
+    if (current >= 0) {
+      index = arg.next ? (current + 1) % PLANETS_MOCK.length : current
+    }
+  }
+  return PLANETS_MOCK[index]
+}
+
 // GET /api/planets — список с фильтром. Если бэкенд недоступен и это гость,
 // возвращаем mock-коллекцию (см. лабу по Redux: rejected → mock + warning).
 export const getPlanetsList = createAsyncThunk<Planet[], void, ThunkConfig>(
   'planets/getPlanetsList',
   async (_, { getState, rejectWithValue }) => {
+    if (MOCK) {
+      return mockFiltered(getState().planets.appliedMaxDist)
+    }
     const { appliedMaxDist } = getState().planets
     try {
       const query = appliedMaxDist === null ? {} : { maxDist: appliedMaxDist }
@@ -61,6 +78,9 @@ export const getFeed = createAsyncThunk<
   { id?: number; next?: boolean } | undefined,
   ThunkConfig
 >('planets/getFeed', async (arg, { getState, rejectWithValue }) => {
+  if (MOCK) {
+    return mockFeed(arg)
+  }
   try {
     const response = await api.planets.feedList(
       arg?.id === undefined ? {} : { id: arg.id, next: arg.next ?? false },
@@ -69,14 +89,7 @@ export const getFeed = createAsyncThunk<
   } catch (error) {
     if (!getState().user.isAuthenticated) {
       console.warn('planets: бэкенд недоступен, показана mock-лента', error)
-      let index = 0
-      if (arg?.id !== undefined) {
-        const current = PLANETS_MOCK.findIndex((planet) => planet.id === arg.id)
-        if (current >= 0) {
-          index = arg.next ? (current + 1) % PLANETS_MOCK.length : current
-        }
-      }
-      return PLANETS_MOCK[index]
+      return mockFeed(arg)
     }
     return rejectWithValue('Не удалось получить ленту')
   }

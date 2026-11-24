@@ -5,7 +5,7 @@
 }
 
 body {
-    max-width: 430px;
+    max-width: 1280px;
     margin: 0 auto;
     background: #0a0a0a;
     color: #fff;
@@ -27,7 +27,7 @@ a {
     left: 50%;
     transform: translateX(-50%);
     width: 100%;
-    max-width: 430px;
+    max-width: 1280px;
     height: 64px;
     background: #020104;
     display: flex;
@@ -64,11 +64,18 @@ a {
     height: 22px;
 }
 
+button.nav-item {
+    background: none;
+    border: none;
+    font-family: inherit;
+    cursor: pointer;
+}
+
 /* ===== FEED PAGE ===== */
 .feed-container {
     position: relative;
     width: 100%;
-    height: calc(100vh - 64px);
+    height: calc(100dvh - 64px);
 }
 
 .feed-media {
@@ -198,6 +205,13 @@ a {
     margin-bottom: 6px;
 }
 
+@media (min-width: 1000px) {
+    .feed-description {
+        right: auto;
+        width: min(560px, calc(100% - 96px));
+    }
+}
+
 .desc-checkbox {
     display: none;
 }
@@ -241,6 +255,8 @@ a {
 
 /* ===== ADD PAGE ===== */
 .add-container {
+    max-width: 700px;
+    margin: 0 auto;
     padding: 24px 20px;
 }
 
@@ -403,6 +419,13 @@ textarea.form-input {
     flex: 1;
 }
 
+@media (max-width: 460px) {
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+}
+
 .form-group {
     margin-bottom: 24px;
 }
@@ -522,8 +545,26 @@ input[type="date"].form-input::-webkit-calendar-picker-indicator {
 
 .tiles-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: 12px;
+}
+
+@media (min-width: 700px) {
+    .tiles-grid {
+        grid-template-columns: repeat(2, minmax(min(300px, 100%), 1fr));
+    }
+}
+
+@media (min-width: 1040px) {
+    .tiles-grid {
+        grid-template-columns: repeat(3, minmax(min(300px, 100%), 1fr));
+    }
+}
+
+@media (max-width: 359px) {
+    .tile-card {
+        min-width: 0;
+    }
 }
 
 .tile-card {
@@ -531,6 +572,7 @@ input[type="date"].form-input::-webkit-calendar-picker-indicator {
     background: #1a1a2e;
     border-radius: 14px;
     overflow: hidden;
+    min-width: 300px;
     transition: transform 0.2s;
 }
 

@@ -2,6 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { Provider } from 'react-redux'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { registerSW } from 'virtual:pwa-register'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './planets.css'
 import App from './App.tsx'
@@ -38,7 +39,9 @@ const router = createBrowserRouter([
       },
     ],
   },
-])
+], {
+  basename: import.meta.env.BASE_URL,
+})
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -47,3 +50,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     </Provider>
   </React.StrictMode>,
 )
+
+if ('serviceWorker' in navigator) {
+  registerSW()
+}

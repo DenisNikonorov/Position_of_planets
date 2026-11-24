@@ -5,7 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:https": "HTTPS=1 vite --host",
     "build": "tsc -b && vite build",
+    "build:pages": "GITHUB_PAGES=1 VITE_MOCK=1 vite build",
+    "deploy": "npm run build:pages && gh-pages -d dist",
     "lint": "oxlint",
     "preview": "vite preview",
     "generate-api": "swagger-typescript-api generate --path http://localhost:8080/swagger/doc.json --output src/api --name Api.ts --axios --extract-response-body --sort-types"
@@ -25,9 +28,11 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
+    "gh-pages": "^6.3.0",
     "oxlint": "^1.88.0",
     "swagger-typescript-api": "^13.13.0",
     "typescript": "~6.0.3",
-    "vite": "^8.3.4"
+    "vite": "^8.3.4",
+    "vite-plugin-pwa": "^2.0.0"
   }
 }

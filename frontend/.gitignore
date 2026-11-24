@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local HTTPS certs (never commit private keys)
+certs/
+dev-dist/

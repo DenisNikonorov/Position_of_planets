@@ -6,8 +6,10 @@ import type { DsPlanetSerializer } from '../api/Api'
 // гарантирует их наличие — поэтому Required<>.
 export type Planet = Required<DsPlanetSerializer>
 
-export const DEFAULT_PHOTO = '/media/default_photo.png'
-export const DEFAULT_VIDEO = '/media/default_video.mp4'
+const media = (file: string) => `${import.meta.env.BASE_URL}media/${file}`
+
+export const DEFAULT_PHOTO = media('default_photo.png')
+export const DEFAULT_VIDEO = media('default_video.mp4')
 
 const isDefault = (url: string, name: string) => !url || url.includes(name)
 
